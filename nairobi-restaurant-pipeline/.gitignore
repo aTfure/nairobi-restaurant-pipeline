@@ -1,0 +1,21 @@
+# Security: Never commit environment variables
+.env
+
+# Database: Ignore local PostgreSQL data volumes
+pgdata/
+database-data/
+
+# Node/Frontend
+node_modules/
+.next/
+dist/
+
+# Python/Airflow
+__pycache__/
+*.pyc
+venv/
+.airflow/
+
+# OS generated files
+.DS_Store
+Thumbs.db
