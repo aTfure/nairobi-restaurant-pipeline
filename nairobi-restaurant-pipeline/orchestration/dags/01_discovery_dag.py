@@ -18,14 +18,18 @@ DEFAULT_ARGS = {
 }
 
 
-def verify_restaurant_count() -> None:
-    conn = psycopg2.connect(
-        dbname=os.getenv("POSTGRES_DB", "nairobi_pipeline"),
-        user=os.getenv("POSTGRES_USER", "nairobi_admin"),
-        password=os.getenv("POSTGRES_PASSWORD", "local_dev_password_123"),
-        host=os.getenv("POSTGRES_HOST", "db"),
-        port=os.getenv("POSTGRES_PORT", "5432"),
+def get_postgres_connection():
+    return psycopg2.connect(
+        host=os.environ.get("POSTGRES_HOST", "nairobi_db"),
+        port=os.environ.get("POSTGRES_PORT", "5432"),
+        user=os.environ.get("POSTGRES_USER"),
+        password=os.environ.get("POSTGRES_PASSWORD"),
+        dbname=os.environ.get("POSTGRES_DB"),
     )
+
+
+def verify_restaurant_count() -> None:
+    conn = get_postgres_connection()
     try:
         with conn.cursor() as cursor:
             cursor.execute("SELECT COUNT(*) FROM restaurants;")

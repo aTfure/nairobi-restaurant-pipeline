@@ -25,13 +25,11 @@ VISION_SERVICE_URL = "http://vision-service:8000/analyze"
 
 
 def get_postgres_connection():
-    return psycopg2.connect(
-        dbname=os.getenv("POSTGRES_DB", "nairobi_pipeline"),
-        user=os.getenv("POSTGRES_USER", "nairobi_admin"),
-        password=os.getenv("POSTGRES_PASSWORD", "local_dev_password_123"),
-        host=os.getenv("POSTGRES_HOST", "nairobi_db"),
-        port=os.getenv("POSTGRES_PORT", "5432"),
+    database_url = os.getenv(
+        "SUPABASE_DB_URL",
+        "postgresql://nairobi_admin:local_dev_password_123@nairobi_db:5432/nairobi_pipeline",
     )
+    return psycopg2.connect(database_url)
 
 
 def fetch_unprocessed_dishes() -> list[dict[str, Any]]:

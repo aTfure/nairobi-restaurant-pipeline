@@ -8,23 +8,29 @@ async function main() {
     process.exit(1);
   }
 
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-dev-shm-usage']
-  });
-
+  let browser;
   try {
+    browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-dev-shm-usage']
+    });
+
     const page = await browser.newPage();
-    await page.goto(targetUrl, { waitUntil: 'networkidle2' });
+    await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 30000 });
     await new Promise((resolve) => setTimeout(resolve, 2000));
     await page.screenshot({ path: '/tmp/test_scrape.png', fullPage: true });
-    console.log(`screenshot_saved:/tmp/test_scrape.png`);
+    console.log('screenshot_saved:/tmp/test_scrape.png');
+  } catch (error) {
+    const message = error && error.message ? error.message : String(error);
+    console.error(`scraper_error:${message}`);
+    if (message.includes('timeout') || message.includes('Timed out')) {
+      console.error('puppeteer_timeout_handled');
+    }
   } finally {
-    await browser.close();
+    if (browser) {
+      await browser.close().catch(() => undefined);
+    }
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+main();
