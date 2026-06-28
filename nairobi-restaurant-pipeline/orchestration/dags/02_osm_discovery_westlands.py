@@ -85,19 +85,26 @@ def fetch_osm_restaurants() -> list[dict[str, Any]]:
     return restaurants
 
 
+def get_postgres_connection():
+    # Prefer explicit local vars; fall back to SUPABASE_DB_URL only if set
+    host = os.getenv("POSTGRES_HOST", "nairobi_db")
+    port = os.getenv("POSTGRES_PORT", "5432")
+    user = os.getenv("POSTGRES_USER", "nairobi_admin")
+    password = os.getenv("POSTGRES_PASSWORD", "local_dev_password_123")
+    dbname = os.getenv("POSTGRES_DB", "nairobi_pipeline")
+    
+    return psycopg2.connect(
+        host=host, port=port, user=user, password=password, dbname=dbname
+    )
+
+
 def ingest_osm_restaurants(**context: Any) -> None:
     restaurants = context["ti"].xcom_pull(task_ids="fetch_osm_restaurants") or []
     if not restaurants:
         print("no_restaurants_to_ingest")
         return
 
-    conn = psycopg2.connect(
-        dbname=os.getenv("POSTGRES_DB", "nairobi_pipeline"),
-        user=os.getenv("POSTGRES_USER", "nairobi_admin"),
-        password=os.getenv("POSTGRES_PASSWORD", "local_dev_password_123"),
-        host=os.getenv("POSTGRES_HOST", "nairobi_db"),
-        port=os.getenv("POSTGRES_PORT", "5432"),
-    )
+    conn = get_postgres_connection()
 
     try:
         with conn.cursor() as cursor:
