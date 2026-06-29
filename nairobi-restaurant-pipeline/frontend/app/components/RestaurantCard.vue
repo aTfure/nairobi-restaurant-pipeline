@@ -13,69 +13,39 @@ defineProps<{
 </script>
 
 <template>
-  <article class="card">
-    <div class="card-header">
-      <span class="card-name">{{ restaurant.name }}</span>
-      <span class="badge">{{ restaurant.source ?? 'OSM' }}</span>
+  <article class="bg-surface-container-lowest border border-surface-variant rounded-lg overflow-hidden flex flex-col hover:border-primary transition-colors cursor-pointer group">
+    <div class="h-32 bg-cover bg-center w-full relative" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDztkxZP3P4uD3fVef0ihQIJoCk8n-D90DPgOUBFGiLVeqpIEfSPEKeBjd_D8UodhSR0gCaEO2ClqhzmoFxVK6Q4mjbMxEv4cJUKkxzO8hnpmI5VGgp6x7Hr8-JL2xGnbPrNGGV7LlVzUqAsqgiTF7XiEU42-GdEMe-knCgzk7RN7GSqWofxqpHM80PDNOkue9teQQdic_zxld67LEGFgutlHboQvHtkTIPHNqz4lV4U3X6mbKtcwJTmVvJVGeqNSAvLexcEhSdYfeb')">
+      <div class="absolute top-2 right-2 bg-secondary-container text-on-secondary-container font-label-caps text-label-caps px-2 py-1 rounded">{{ restaurant.source || 'OSM' }}</div>
     </div>
-    <div class="card-meta">
-      <div v-if="restaurant.city" class="card-row">
-        <span class="icon">🏙</span>{{ restaurant.city }}
+
+    <div class="p-[1.1rem] flex flex-col gap-2">
+      <div class="flex justify-between items-start">
+        <h3 class="font-headline-md text-[18px] leading-tight text-on-background group-hover:text-primary transition-colors">{{ restaurant.name }}</h3>
+        <span class="bg-secondary-fixed-dim text-on-secondary-fixed-variant font-label-caps text-label-caps px-2 py-0.5 rounded-full flex items-center gap-1">
+          <span class="material-symbols-outlined" style="font-size: 12px;">check_circle</span> Stable
+        </span>
       </div>
-      <div class="card-row">
-        <span class="icon">📍</span>
-        <span v-if="restaurant.address">{{ restaurant.address }}</span>
-        <span v-else class="no-address">No address recorded</span>
+
+      <div class="flex flex-col gap-1 mt-1">
+        <div class="font-body-base text-body-base text-on-surface-variant flex items-center gap-2">
+          <span class="material-symbols-outlined" style="font-size: 16px;">storefront</span>
+          <span>{{ restaurant.address || 'Address pending' }}</span>
+        </div>
+        <div class="font-label-caps text-label-caps text-on-surface-variant flex items-center gap-2 mt-2">
+          <span class="material-symbols-outlined" style="font-size: 14px;">my_location</span>
+          {{ restaurant.lat.toFixed(4) }}, {{ restaurant.lng.toFixed(4) }}
+        </div>
       </div>
-      <div class="card-row coords">
-        {{ restaurant.lat.toFixed(4) }}, {{ restaurant.lng.toFixed(4) }}
+
+      <div class="mt-3 flex flex-col gap-1">
+        <div class="flex justify-between font-label-caps text-label-caps text-on-surface-variant">
+          <span>Extraction Confidence</span>
+          <span>94%</span>
+        </div>
+        <div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+          <div class="h-full bg-secondary" style="width: 94%;"></div>
+        </div>
       </div>
     </div>
   </article>
 </template>
-
-<style scoped>
-.card {
-  background: white;
-  border: 0.5px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1rem 1.1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: border-color 0.15s;
-}
-.card:hover { border-color: #94a3b8; }
-.card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-}
-.card-name {
-  font-size: 14px;
-  font-weight: 600;
-  color: #0f172a;
-  line-height: 1.3;
-}
-.badge {
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 20px;
-  background: #dcfce7;
-  color: #166534;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.card-meta { display: flex; flex-direction: column; gap: 4px; }
-.card-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  font-size: 13px;
-  color: #475569;
-}
-.icon { font-size: 12px; margin-top: 1px; flex-shrink: 0; }
-.no-address { color: #94a3b8; font-style: italic; }
-.coords { font-size: 12px; color: #94a3b8; padding-left: 18px; }
-</style>

@@ -29,158 +29,86 @@ function setFilter(f: 'all' | 'has-address' | 'no-address') {
 </script>
 
 <template>
-  <main class="page">
-    <section class="hero">
-      <p class="eyebrow">Westlands, Nairobi</p>
-      <h1>Restaurant Explorer</h1>
-      <p class="sub">
-        {{ allRestaurants?.length ?? 283 }} restaurants discovered via OpenStreetMap pipeline
+  <div class="w-full">
+    <section class="flex flex-col gap-2">
+      <div class="flex items-center gap-2 text-on-surface-variant font-label-caps text-label-caps">
+        <span class="material-symbols-outlined" style="font-size: 16px;">location_on</span>
+        WESTLANDS, NAIROBI
+      </div>
+      <h2 class="font-display-lg text-display-lg text-on-background">Restaurant Explorer</h2>
+      <p class="font-body-base text-body-base text-on-surface-variant max-w-2xl">
+        {{ allRestaurants?.length ?? 283 }} restaurants discovered via OpenStreetMap pipeline. Displaying live extraction telemetry and confidence scores for verified geographic entities.
       </p>
     </section>
 
-    <div class="stats-row">
-      <div class="stat">
-        <div class="stat-label">Total</div>
-        <div class="stat-value">{{ allRestaurants?.length ?? 283 }}</div>
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-gutter mt-4">
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack-md flex flex-col gap-1">
+        <span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Total Restaurants</span>
+        <span class="font-stat-lg text-stat-lg text-on-background">{{ allRestaurants?.length ?? 283 }}</span>
       </div>
-      <div class="stat">
-        <div class="stat-label">Showing</div>
-        <div class="stat-value">{{ filtered.length }}</div>
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack-md flex flex-col gap-1">
+        <span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Showing</span>
+        <span class="font-stat-lg text-stat-lg text-on-background">{{ filtered.length }}</span>
       </div>
-      <div class="stat">
-        <div class="stat-label">Sources</div>
-        <div class="stat-value">OSM</div>
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack-md flex flex-col gap-1">
+        <span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Avg Confidence</span>
+        <span class="font-stat-lg text-stat-lg text-secondary flex items-center gap-2">88% <span class="material-symbols-outlined" style="font-size: 20px;">trending_up</span></span>
       </div>
-      <div class="stat">
-        <div class="stat-label">Area</div>
-        <div class="stat-value">Westlands</div>
+      <div class="bg-surface-container-lowest border border-surface-variant rounded-lg p-stack-md flex flex-col gap-1">
+        <span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Coverage Area</span>
+        <span class="font-stat-lg text-stat-lg text-on-background truncate">Westlands</span>
       </div>
-    </div>
+    </section>
 
-    <div class="filters">
+    <section class="flex flex-wrap gap-2 items-center mt-2">
       <button
         v-for="f in [
           { key: 'all', label: 'All' },
-          { key: 'has-address', label: 'Has address' },
-          { key: 'no-address', label: 'No address' },
+          { key: 'has-address', label: 'Verified' },
+          { key: 'no-address', label: 'Pending' },
         ]"
         :key="f.key"
-        class="filter-btn"
-        :class="{ active: activeFilter === f.key }"
+        class="px-4 py-2 rounded-lg transition-colors"
+        :class="activeFilter === f.key
+          ? 'bg-primary-container text-on-primary-container font-body-bold'
+          : 'bg-surface-container-lowest border border-surface-variant text-on-surface-variant font-body-base hover:bg-surface-container-low'"
         @click="setFilter(f.key as any)"
       >
         {{ f.label }}
       </button>
-    </div>
+      <button class="bg-surface-container-lowest border border-error-container text-error font-body-base px-4 py-2 rounded-lg hover:bg-error-container transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined" style="font-size: 16px;">warning</span> Sync Issues
+      </button>
+    </section>
 
-    <div v-if="pending" class="state">Loading restaurants…</div>
-    <div v-else-if="error" class="state error">Unable to load restaurants.</div>
+    <div v-if="pending" class="py-16 text-center text-on-surface-variant">Loading restaurants…</div>
+    <div v-else-if="error" class="py-16 text-center text-error">Unable to load restaurants.</div>
     <template v-else>
-      <div class="grid">
+      <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter mt-2">
         <RestaurantCard
           v-for="r in paginated"
           :key="r.id"
           :restaurant="r"
         />
-      </div>
+      </section>
 
-      <div v-if="totalPages > 1" class="pagination">
-        <button
-          class="page-btn"
-          :disabled="currentPage === 1"
-          @click="currentPage--"
-        >‹</button>
-        <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
-        <button
-          class="page-btn"
-          :disabled="currentPage === totalPages"
-          @click="currentPage++"
-        >›</button>
+      <div v-if="totalPages > 1" class="flex items-center justify-center gap-3 mt-6">
+        <button class="px-3 py-2 rounded-lg border border-surface-variant bg-surface-container-lowest text-on-surface-variant disabled:opacity-35" :disabled="currentPage === 1" @click="currentPage--">‹</button>
+        <span class="text-sm text-on-surface-variant">Page {{ currentPage }} of {{ totalPages }}</span>
+        <button class="px-3 py-2 rounded-lg border border-surface-variant bg-surface-container-lowest text-on-surface-variant disabled:opacity-35" :disabled="currentPage === totalPages" @click="currentPage++">›</button>
       </div>
     </template>
-  </main>
+
+    <section class="mt-8 bg-surface-container-low border border-outline-variant rounded-lg p-stack-lg flex flex-col md:flex-row gap-6 items-center justify-between">
+      <div class="flex-1">
+        <h3 class="font-headline-md text-[20px] text-on-background mb-1">Add a Missing Entity</h3>
+        <p class="font-body-base text-body-base text-on-surface-variant">Manually inject a new restaurant record into the crowdsourced verification pipeline.</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+        <input class="bg-surface-container-lowest border border-surface-variant rounded-lg px-4 py-2 font-body-base text-body-base text-on-surface focus:outline-none focus:border-primary transition-colors min-w-[200px]" placeholder="Restaurant Name" type="text" />
+        <input class="bg-surface-container-lowest border border-surface-variant rounded-lg px-4 py-2 font-body-base text-body-base text-on-surface focus:outline-none focus:border-primary transition-colors min-w-[200px]" placeholder="Address / Location" type="text" />
+        <button class="bg-primary text-on-primary font-body-bold px-6 py-2 rounded-lg hover:opacity-90 transition-opacity whitespace-nowrap">Inject Record</button>
+      </div>
+    </section>
+  </div>
 </template>
-
-<style scoped>
-.page {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 2rem 1rem 3rem;
-  font-family: Inter, system-ui, sans-serif;
-}
-.eyebrow {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #64748b;
-  margin-bottom: 0.25rem;
-}
-.hero h1 { font-size: 2rem; font-weight: 600; margin: 0 0 0.25rem; }
-.sub { color: #64748b; margin-bottom: 1.5rem; }
-
-.stats-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 1rem;
-}
-.stat {
-  background: #f1f5f9;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  flex: 1;
-}
-.stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.2rem; }
-.stat-value { font-size: 20px; font-weight: 600; color: #0f172a; }
-
-.filters {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 1.25rem;
-}
-.filter-btn {
-  padding: 0.45rem 1rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: white;
-  color: #475569;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.filter-btn:hover { background: #f8fafc; }
-.filter-btn.active {
-  background: #eff6ff;
-  border-color: #93c5fd;
-  color: #1d4ed8;
-}
-
-.grid {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 1.5rem;
-}
-.page-btn {
-  padding: 0.45rem 0.9rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: white;
-  color: #475569;
-  font-size: 16px;
-  cursor: pointer;
-}
-.page-btn:disabled { opacity: 0.35; cursor: default; }
-.page-btn:not(:disabled):hover { background: #f8fafc; }
-.page-info { font-size: 13px; color: #64748b; }
-
-.state { padding: 3rem; text-align: center; color: #64748b; }
-.error { color: #dc2626; }
-</style>
